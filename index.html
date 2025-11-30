@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luxe Candles - Premium Handcrafted Candles</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Georgia', serif;
+      background: #ffffff;
+    }
+    html { height: 100%; }
+    .app-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .page { display: none; }
+    .page.active { display: block; }
+    .hero-section {
+      background: linear-gradient(135deg, #f5f0e8 0%, #e8dcc8 100%);
+      padding: 60px 20px;
+      text-align: center;
+    }
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      width: 100%;
+      max-width: 280px;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+    }
+    .product-image-wrapper {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+    }
+    .product-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .btn-primary {
+      background: #2d5c3f;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .btn-primary:hover { background: #234a32; }
+    .btn-secondary {
+      background: #d4534f;
+      color: white;
+      padding: 6px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-secondary:hover { background: #b84440; }
+    .input-field {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e0d5c7;
+      border-radius: 6px;
+      font-family: 'Georgia', serif;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #2d5c3f;
+    }
+    .cart-badge {
+      background: #d4534f;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 11px;
+      position: absolute;
+      top: -8px;
+      right: -8px;
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #2d5c3f;
+      color: white;
+      padding: 14px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+<div class="app-container" id="app">
+  <!-- NAVBAR -->
+  <nav style="background:#f5f0e8; padding:20px 40px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+    <div style="max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="background-color:#f5f0e8; padding:6px; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center;">
+          <img src="logo4.jpg" alt="Luxe Candles Logo" style="width:36px; height:36px; object-fit:contain; background-color:transparent;">
+        </div>
+        <h1 style="margin:0; font-size:24px; color:#2d5c3f;">Luxe Candles</h1>
+        <span id="user-display" style="margin-left:8px; font-size:18px; color:#5a4a3a;"></span>
+      </div>
+      <div style="display:flex; gap:20px; align-items:center;">
+        <a href="#home" class="nav-link" style="color:#2d5c3f; text-decoration:none;">Home</a>
+        <a href="#products" class="nav-link" style="color:#2d5c3f; text-decoration:none;">Products</a>
+        <a href="#account" id="account-link" class="nav-link" style="color:#2d5c3f; text-decoration:none; display:none;">Account</a>
+        <div style="position:relative;">
+          <a href="#cart" class="nav-link" style="color:#2d5c3f; text-decoration:none;">
+            🛒 Cart
+            <span id="cart-count" class="cart-badge" style="display:none;">0</span>
+          </a>
+        </div>
+        <a href="#login" id="login-link" class="nav-link" style="color:#2d5c3f; text-decoration:none;">Login</a>
+        <button id="logout-btn" class="btn-secondary" style="display:none;">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HOME PAGE -->
+  <main class="page active" id="home-page" style="flex:1;">
+    <div class="hero-section">
+      <h2 style="font-size:40px; color:#2d5c3f; margin:0 0 10px;">Illuminate Your Space</h2>
+      <p style="font-size:18px; color:#5a4a3a; margin:0 0 18px;">Handcrafted candles made with love and natural ingredients</p>
+      <button class="btn-primary" onclick="navigateTo('products')">Shop Now</button>
+    </div>
+
+    <!-- Featured Collections -->
+    <div style="max-width:1200px; margin:35px auto; padding:0 20px;">
+      <h3 style="text-align:center; font-size:30px; color:#2d5c3f; margin-bottom:25px;">Featured Collections</h3>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px;">
+        <div style="text-align:center; padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <div style="width:100%; height:140px; border-radius:10px; overflow:hidden; margin-bottom:15px;">
+            <img src="flower.jpg" alt="Floral Bliss" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <h4 style="font-size:20px; color:#2d5c3f; margin:0 0 8px;">Floral Bliss</h4>
+          <p style="color:#7a6a5a; margin:0;">Delicate floral scents for relaxation</p>
+        </div>
+        <div style="text-align:center; padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <div style="width:100%; height:140px; border-radius:10px; overflow:hidden; margin-bottom:15px;">
+            <img src="herb.jpg" alt="Fresh Herbs" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <h4 style="font-size:20px; color:#2d5c3f; margin:0 0 8px;">Fresh Herbs</h4>
+          <p style="color:#7a6a5a; margin:0;">Crisp and invigorating aromas</p>
+        </div>
+        <div style="text-align:center; padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <div style="width:100%; height:140px; border-radius:10px; overflow:hidden; margin-bottom:15px;">
+            <img src="spices.jpg" alt="Warm Spices" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <h4 style="font-size:20px; color:#2d5c3f; margin:0 0 8px;">Warm Spices</h4>
+          <p style="color:#7a6a5a; margin:0;">Cozy autumn-inspired fragrances</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- PRODUCTS PAGE -->
+  <main class="page" id="products-page" style="flex:1;">
+    <div style="background:#f5f0e8; padding:35px 20px; text-align:center;">
+      <h2 style="font-size:32px; color:#2d5c3f; margin:0;">Our Collection</h2>
+    </div>
+    <div style="max-width:1100px; margin:35px auto; padding:0 20px;">
+      <div id="products-grid" style="
+        display:grid;
+        grid-template-columns:repeat(3, minmax(0,1fr));
+        gap:25px;
+        justify-items:center;
+      "></div>
+    </div>
+  </main>
+
+  <!-- CART PAGE -->
+  <main class="page" id="cart-page" style="flex:1;">
+    <div style="background:#f5f0e8; padding:35px 20px; text-align:center;">
+      <h2 style="font-size:32px; color:#2d5c3f; margin:0;">Shopping Cart</h2>
+    </div>
+    <div style="max-width:800px; margin:35px auto; padding:0 20px;">
+      <div id="cart-items"></div>
+      <div id="cart-empty" style="text-align:center; padding:40px 20px; display:none;">
+        <span style="font-size:60px;">🛒</span>
+        <p style="font-size:18px; color:#7a6a5a;">Your cart is empty</p>
+        <button class="btn-primary" onclick="navigateTo('products')">Continue Shopping</button>
+      </div>
+      <div id="cart-summary" style="background:white; padding:20px; border-radius:12px; margin-top:20px; display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:18px; font-weight:bold; color:#2d5c3f;">Total:</span>
+          <span id="cart-total" style="font-size:20px; font-weight:bold; color:#2d5c3f;">$0.00</span>
+        </div>
+        <button class="btn-primary" style="width:100%; margin-top:15px;" onclick="goToCheckout()">Proceed to Checkout</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- CHECKOUT PAGE -->
+  <main class="page" id="checkout-page" style="flex:1;">
+    <div style="background:#f5f0e8; padding:35px 20px; text-align:center;">
+      <h2 style="font-size:30px; color:#2d5c3f; margin:0;">Order Summary</h2>
+    </div>
+    <div style="max-width:600px; margin:30px auto; padding:0 20px;">
+      <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <p style="margin:0 0 10px;">Items: <span id="checkout-items-count">0</span></p>
+        <p style="margin:0 0 10px;">Total: <span id="checkout-total">$0.00</span></p>
+        <button class="btn-primary" style="width:100%; margin-top:10px;" onclick="goToPayment()">Continue to Payment</button>
+        <button class="btn-secondary" style="width:100%; margin-top:10px;" onclick="navigateTo('cart')">Back to Cart</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- PAYMENT PAGE -->
+  <main class="page" id="payment-page" style="flex:1;">
+    <div style="background:#f5f0e8; padding:35px 20px; text-align:center;">
+      <h2 style="font-size:30px; color:#2d5c3f; margin:0;">Shipping & Payment</h2>
+    </div>
+    <div style="max-width:600px; margin:30px auto; padding:0 20px;">
+      <form id="payment-form" style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);" onsubmit="handlePayment(event)">
+        <h3 style="margin-top:0; color:#2d5c3f; font-size:20px;">Shipping Details</h3>
+        <label>Full Name</label>
+        <input class="input-field" id="ship-name" required />
+        <label style="margin-top:10px;">Address</label>
+        <input class="input-field" id="ship-address" required />
+        <label style="margin-top:10px;">City</label>
+        <input class="input-field" id="ship-city" required />
+        <label style="margin-top:10px;">Postal Code</label>
+        <input class="input-field" id="ship-postal" required />
+
+        <h3 style="margin-top:20px; color:#2d5c3f; font-size:20px;">Payment Details</h3>
+        <label>Payment Method</label>
+        <select class="input-field" id="payment-method">
+          <option>Credit Card</option>
+          <option>Debit Card</option>
+          <option>Cash on Delivery</option>
+        </select>
+        <label style="margin-top:10px;">Card Number</label>
+        <input class="input-field" id="card-number" />
+
+        <p style="margin-top:15px;">Order Total: <span id="payment-total">$0.00</span></p>
+        <button type="submit" class="btn-primary" style="width:100%; margin-top:10px;">Place Order</button>
+        <button type="button" class="btn-secondary" style="width:100%; margin-top:10px;" onclick="navigateTo('checkout')">Back to Summary</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- ACCOUNT PAGE -->
+  <main class="page" id="account-page" style="flex:1;">
+    <div style="background:#f5f0e8; padding:35px 20px; text-align:center;">
+      <h2 style="font-size:30px; color:#2d5c3f; margin:0;">My Account</h2>
+    </div>
+    <div style="max-width:900px; margin:30px auto; padding:0 20px;">
+      <div id="account-content" style="display:grid; grid-template-columns:1.2fr 1.8fr; gap:20px;">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- LOGIN PAGE -->
+  <main class="page" id="login-page" style="flex:1;">
+    <div style="max-width:400px; margin:60px auto; padding:0 20px;">
+      <div style="background:white; padding:25px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+        <h2 style="text-align:center; font-size:26px; color:#2d5c3f; margin:0 0 18px;">Welcome Back</h2>
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <label>Email</label>
+          <input type="email" id="login-email" class="input-field" required />
+          <label style="margin-top:8px;">Password</label>
+          <input type="password" id="login-password" class="input-field" required />
+          <button type="submit" class="btn-primary" style="width:100%; margin-top:15px;">Log In</button>
+        </form>
+        <p style="text-align:center; margin-top:15px; color:#5a4a3a; font-size:14px;">
+          Don’t have an account?
+          <a href="#signup" onclick="navigateTo('signup')" style="color:#2d5c3f; font-weight:bold; text-decoration:none;">Sign up now</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- SIGNUP PAGE -->
+  <main class="page" id="signup-page" style="flex:1;">
+    <div style="max-width:400px; margin:60px auto; padding:0 20px;">
+      <div style="background:white; padding:25px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+        <h2 style="text-align:center; font-size:26px; color:#2d5c3f; margin:0 0 18px;">Create Account</h2>
+        <form id="signup-form" onsubmit="handleSignup(event)">
+          <label>Full Name</label>
+          <input type="text" id="signup-name" class="input-field" required />
+          <label style="margin-top:8px;">Email</label>
+          <input type="email" id="signup-email" class="input-field" required />
+          <label style="margin-top:8px;">Password</label>
+          <input type="password" id="signup-password" class="input-field" required />
+          <button type="submit" class="btn-primary" style="width:100%; margin-top:15px;">Sign Up</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer style="background:#2d5c3f; color:white; padding:15px; text-align:center; margin-top:auto;">
+    © 2025 Luxe Candles. All rights reserved.
+  </footer>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- Firebase v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAeWq_W_HhBliul5zsc5L9R6scaOlRbPEE",
+    authDomain: "luxe-candles.firebaseapp.com",
+    projectId: "luxe-candles",
+    storageBucket: "luxe-candles.firebasestorage.app",
+    messagingSenderId: "374588850892",
+    appId: "1:374588850892:web:a5c3acf928bf4b55e17869"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+
+<script>
+  /* ---------- PRODUCTS & CART ---------- */
+  const products = [
+    { id: 1, name: 'Lavender Dreams', price: 24.99, image: 'lavender.png', description: 'Soothing lavender scent for calm evenings' },
+    { id: 2, name: 'Vanilla Bliss',  price: 22.99, image: 'vanilla.png',  description: 'Warm and sweet vanilla aroma' },
+    { id: 3, name: 'Ocean Breeze',  price: 26.99, image: 'Ocean.png',    description: 'Fresh coastal fragrance' },
+    { id: 4, name: 'Cinnamon Spice', price: 23.99, image: 'Cinnamon.png', description: 'Cozy cinnamon and spice notes' },
+    { id: 5, name: 'Rose Garden',   price: 27.99, image: 'rose.png',     description: 'Elegant rose bouquet fragrance' },
+    { id: 6, name: 'Pine Forest',   price: 25.99, image: 'pine.png',     description: 'Crisp evergreen and woody scent' }
+  ];
+
+  let cart = [];
+
+  function renderProducts() {
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = products.map(p => `
+      <div class="product-card">
+        <div class="product-image-wrapper">
+          <img src="${p.image}" alt="${p.name}">
+        </div>
+        <div style="padding:15px;">
+          <h3 style="font-size:18px; color:#2d5c3f; margin:0 0 8px;">${p.name}</h3>
+          <p style="color:#7a6a5a; margin:0 0 10px; font-size:14px;">${p.description}</p>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:18px; font-weight:bold; color:#2d5c3f;">$${p.price.toFixed(2)}</span>
+            <button class="btn-secondary" onclick="addToCart(${p.id})">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function addToCart(id) {
+    const p = products.find(x => x.id === id);
+    const existing = cart.find(x => x.id === id);
+    if (existing) existing.quantity++;
+    else cart.push({ ...p, quantity: 1 });
+    updateCartUI();
+    renderCart();
+    showToast(p.name + ' added to cart!');
+  }
+
+  function updateCartUI() {
+    const badge = document.getElementById('cart-count');
+    const total = cart.reduce((s, i) => s + i.quantity, 0);
+    if (total > 0) {
+      badge.style.display = 'block';
+      badge.textContent = total;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function renderCart() {
+    const cartItems = document.getElementById('cart-items');
+    const cartEmpty = document.getElementById('cart-empty');
+    const cartSummary = document.getElementById('cart-summary');
+
+    if (cart.length === 0) {
+      cartItems.innerHTML = '';
+      cartEmpty.style.display = 'block';
+      cartSummary.style.display = 'none';
+      return;
+    }
+
+    cartEmpty.style.display = 'none';
+    cartSummary.style.display = 'block';
+
+    cartItems.innerHTML = cart.map(item => `
+      <div style="background:white;padding:15px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <img src="${item.image}" alt="${item.name}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;">
+          <div>
+            <h3 style="margin:0;color:#2d5c3f;font-size:16px;">${item.name}</h3>
+            <p style="margin:0;color:#7a6a5a;font-size:13px;">$${item.price.toFixed(2)} each</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="btn-secondary" onclick="updateQuantity(${item.id}, -1)">−</button>
+          <span style="font-weight:bold;min-width:24px;text-align:center;">${item.quantity}</span>
+          <button class="btn-secondary" onclick="updateQuantity(${item.id}, 1)">+</button>
+          <span style="font-weight:bold;color:#2d5c3f;min-width:70px;text-align:right;font-size:13px;">$${(item.price*item.quantity).toFixed(2)}</span>
+          <button class="btn-secondary" onclick="removeFromCart(${item.id})">Remove</button>
+        </div>
+      </div>
+    `).join('');
+
+    const totalPrice = cart.reduce((s,i)=>s + i.price*i.quantity,0);
+    document.getElementById('cart-total').textContent = '$' + totalPrice.toFixed(2);
+  }
+
+  function updateQuantity(id, change) {
+    const item = cart.find(i => i.id === id);
+    if (!item) return;
+    item.quantity += change;
+    if (item.quantity <= 0) cart = cart.filter(i => i.id !== id);
+    updateCartUI();
+    renderCart();
+  }
+
+  function removeFromCart(id) {
+    cart = cart.filter(i => i.id !== id);
+    updateCartUI();
+    renderCart();
+  }
+
+  /* ---------- CHECKOUT / PAYMENT ---------- */
+
+  function calcCartTotal() {
+    return cart.reduce((s,i)=>s + i.price*i.quantity,0);
+  }
+
+  function goToCheckout() {
+    if (cart.length === 0) {
+      showToast('Your cart is empty.');
+      return;
+    }
+    updateCheckoutSummary();
+    navigateTo('checkout');
+  }
+
+  function updateCheckoutSummary() {
+    const items = cart.reduce((s,i)=>s+i.quantity,0);
+    const total = calcCartTotal();
+    document.getElementById('checkout-items-count').textContent = items;
+    document.getElementById('checkout-total').textContent = '$' + total.toFixed(2);
+    document.getElementById('payment-total').textContent = '$' + total.toFixed(2);
+  }
+
+  function goToPayment() {
+    updateCheckoutSummary();
+    navigateTo('payment');
+  }
+
+  function getCurrentUserId() {
+    const u = auth.currentUser;
+    return u ? u.uid : null;
+  }
+
+  // حفظ العنوان في Firestore
+  function saveAddressForUser(uid, addrObj) {
+    const user = auth.currentUser;
+    const name = user ? (user.displayName || user.email.split('@')[0]) : '';
+    const email = user ? user.email : '';
+    return db.collection('users').doc(uid).set({
+      name,
+      email,
+      lastAddress: addrObj
+    }, { merge: true });
+  }
+
+  // قراءة العنوان من Firestore
+  async function loadAddressForUser(uid) {
+    const doc = await db.collection('users').doc(uid).get();
+    if (!doc.exists) return null;
+    const data = doc.data();
+    return data.lastAddress || null;
+  }
+
+  // حفظ طلب جديد في subcollection orders
+  function saveOrderForUser(uid, order) {
+    return db.collection('users').doc(uid).collection('orders').add(order);
+  }
+
+  // قراءة الطلبات من Firestore
+  async function loadOrdersForUser(uid) {
+    const snapshot = await db
+      .collection('users')
+      .doc(uid)
+      .collection('orders')
+      .orderBy('createdAtMs', 'desc')
+      .get();
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+
+  async function handlePayment(e) {
+    e.preventDefault();
+
+    if (cart.length === 0) {
+      showToast('Your cart is empty.');
+      return;
+    }
+
+    const name   = document.getElementById('ship-name').value.trim();
+    const addr   = document.getElementById('ship-address').value.trim();
+    const city   = document.getElementById('ship-city').value.trim();
+    const postal = document.getElementById('ship-postal').value.trim();
+    const method = document.getElementById('payment-method').value;
+    const card   = document.getElementById('card-number').value.trim();
+    const total  = calcCartTotal();
+
+    const uid = getCurrentUserId();
+    const now = new Date();
+    const order = {
+      createdAtMs: now.getTime(),
+      createdAtText: now.toLocaleString(),
+      total,
+      method,
+      last4: card ? card.slice(-4) : '',
+      items: cart.map(i => ({
+        name: i.name,
+        qty: i.quantity,
+        price: i.price
+      }))
+    };
+
+    try {
+      if (uid) {
+        await saveAddressForUser(uid, { name, addr, city, postal });
+        await saveOrderForUser(uid, order);
+        showToast('Order placed successfully!');
+      } else {
+        showToast('Order placed (guest).');
+      }
+      cart = [];
+      updateCartUI();
+      renderCart();
+      e.target.reset();
+      navigateTo(uid ? 'account' : 'home');
+    } catch (err) {
+      console.error(err);
+      showToast('Could not place order. Please try again.');
+    }
+  }
+
+  /* ---------- ACCOUNT PAGE ---------- */
+
+  async function renderAccountPage() {
+    const container = document.getElementById('account-content');
+    const user = auth.currentUser;
+
+    if (!user) {
+      container.innerHTML = `
+        <div style="grid-column:1 / -1; background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:center;">
+          <p style="margin:0 0 10px;">You are not logged in.</p>
+          <button class="btn-primary" onclick="navigateTo('login')">Log in</button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="grid-column:1 / -1; background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:center;">
+        Loading your account...
+      </div>
+    `;
+
+    try {
+      const uid = user.uid;
+      const displayName = user.displayName || user.email.split('@')[0];
+
+      const [addr, orders] = await Promise.all([
+        loadAddressForUser(uid),
+        loadOrdersForUser(uid)
+      ]);
+
+      const leftHtml = `
+        <div>
+          <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0; color:#2d5c3f;">Account Details</h3>
+            <p style="margin:0 0 6px;"><strong>Name:</strong> ${displayName}</p>
+            <p style="margin:0 0 6px;"><strong>Email:</strong> ${user.email}</p>
+            <p style="margin:10px 0 0; font-size:13px; color:#7a6a5a;">Your account is linked with Firebase Authentication.</p>
+          </div>
+
+          <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); margin-top:15px;">
+            <h3 style="margin-top:0; color:#2d5c3f;">Saved Address</h3>
+            ${
+              addr
+              ? `
+                <p style="margin:0 0 4px;"><strong>Name:</strong> ${addr.name}</p>
+                <p style="margin:0 0 4px;"><strong>Address:</strong> ${addr.addr}</p>
+                <p style="margin:0 0 4px;"><strong>City:</strong> ${addr.city}</p>
+                <p style="margin:0 0 4px;"><strong>Postal Code:</strong> ${addr.postal}</p>
+                <p style="margin:10px 0 0; font-size:13px; color:#7a6a5a;">This is the last shipping address you used at checkout.</p>
+              `
+              : `
+                <p style="margin:0 0 6px;">No address saved yet.</p>
+                <button class="btn-primary" onclick="navigateTo('payment')">Add address at checkout</button>
+              `
+            }
+          </div>
+        </div>
+      `;
+
+      let ordersHtml = `
+        <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <h3 style="margin-top:0; color:#2d5c3f;">My Orders</h3>
+      `;
+
+      if (!orders || orders.length === 0) {
+        ordersHtml += `
+          <p style="margin:0 0 6px;">You have no orders yet.</p>
+          <p style="margin:0; font-size:13px; color:#7a6a5a;">Place an order and it will appear here.</p>
+        `;
+      } else {
+        ordersHtml += `
+          <div style="max-height:260px; overflow-y:auto;">
+            ${orders.map((o, index) => `
+              <div style="border-bottom:1px solid #eee; padding:10px 0;">
+                <p style="margin:0 0 4px;"><strong>Order #${orders.length - index}</strong> — ${o.createdAtText || ''}</p>
+                <p style="margin:0 0 4px;">Items: ${o.items ? o.items.reduce((s,i)=>s+i.qty,0) : 0} | Total: $${(o.total || 0).toFixed(2)}</p>
+                <p style="margin:0 0 4px; font-size:13px; color:#7a6a5a;">
+                  ${o.method || ''}${o.last4 ? ' • **** ' + o.last4 : ''}
+                </p>
+                <p style="margin:4px 0 0; font-size:13px;">
+                  ${o.items ? o.items.map(i => `${i.qty} × ${i.name}`).join(', ') : ''}
+                </p>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      ordersHtml += `</div>`;
+
+      container.innerHTML = `
+        ${leftHtml}
+        ${ordersHtml}
+      `;
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = `
+        <div style="grid-column:1 / -1; background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:center;">
+          <p>Could not load your account. Please refresh the page.</p>
+        </div>
+      `;
+    }
+  }
+
+  /* ---------- TOAST & NAVIGATION ---------- */
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  function navigateTo(page) {
+    if (page === 'account' && !auth.currentUser) {
+      showToast('Please log in to view your account.');
+      page = 'login';
+    }
+
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById(page + '-page');
+    if (target) target.classList.add('active');
+    window.location.hash = page;
+
+    if (page === 'cart') renderCart();
+    if (page === 'products') renderProducts();
+    if (page === 'account') renderAccountPage();
+  }
+
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const page = link.getAttribute('href').substring(1);
+      navigateTo(page);
+    });
+  });
+
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.substring(1) || 'home';
+    navigateTo(hash);
+  });
+
+  /* ---------- AUTH (LOGIN / SIGNUP / LOGOUT) ---------- */
+
+  function mapAuthError(error) {
+    const code = error.code || '';
+    if (code.includes('invalid-login') || code === 'auth/invalid-login-credentials') {
+      return 'Invalid email or password. Please try again or sign up first.';
+    }
+    if (code === 'auth/user-not-found')  return 'No account found with this email.';
+    if (code === 'auth/wrong-password')  return 'Incorrect password.';
+    if (code === 'auth/too-many-requests') return 'Too many attempts. Please wait and try again.';
+    return 'Something went wrong. Please try again.';
+  }
+
+  async function handleSignup(e) {
+    e.preventDefault();
+    const name = document.getElementById('signup-name').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+
+    try {
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      await cred.user.updateProfile({ displayName: name });
+      await db.collection('users').doc(cred.user.uid).set({
+        name,
+        email
+      }, { merge: true });
+      showToast('Welcome ' + name + '!');
+      document.getElementById('signup-form').reset();
+      navigateTo('account');
+    } catch (err) {
+      console.error(err);
+      showToast(mapAuthError(err));
+    }
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    try {
+      const cred = await auth.signInWithEmailAndPassword(email, password);
+      const user = cred.user;
+      await db.collection('users').doc(user.uid).set({
+        name: user.displayName || user.email.split('@')[0],
+        email: user.email
+      }, { merge: true });
+      showToast('Welcome back, ' + (user.displayName || user.email) + '!');
+      document.getElementById('login-form').reset();
+      navigateTo('account');
+    } catch (err) {
+      console.error(err);
+      showToast(mapAuthError(err));
+    }
+  }
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    auth.signOut().then(() => {
+      showToast('Logged out.');
+      navigateTo('home');
+    });
+  });
+
+  auth.onAuthStateChanged(user => {
+    const loginLink = document.getElementById('login-link');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userDisplay = document.getElementById('user-display');
+    const accountLink = document.getElementById('account-link');
+
+    if (user) {
+      loginLink.style.display = 'inline-block';
+      logoutBtn.style.display = 'inline-block';
+      accountLink.style.display = 'inline-block';
+      userDisplay.textContent = 'Hi, ' + (user.displayName || user.email.split('@')[0]);
+    } else {
+      loginLink.style.display = 'inline-block';
+      logoutBtn.style.display = 'none';
+      accountLink.style.display = 'none';
+      userDisplay.textContent = '';
+    }
+  });
+
+  /* ---------- INITIAL LOAD ---------- */
+  renderProducts();
+  updateCartUI();
+  renderCart();
+  const initialPage = window.location.hash.substring(1) || 'home';
+  navigateTo(initialPage);
+</script>
+</body>
+</html>
